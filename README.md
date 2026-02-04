@@ -27,6 +27,8 @@ This repo is pinned to a specific commit (yes I know, yuck), and as such is inte
 
 ## Quick start
 
+Make sure you get a huggingface token first and use it below:
+
 ```bash
 git clone https://github.com/antongisli/chatterbox-gb10.git
 cd chatterbox-gb10
