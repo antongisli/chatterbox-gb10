@@ -14,13 +14,35 @@ Your own text-to-speech service with:
 - **🚀 Optimized for ARM** - GraceHopper/GB10 compatible with CUDA JIT fixes
 - **⚡ Multiple Models** - Choose between Turbo (fast, distilled) or Original (CFG control)
 - **🎭 Paralinguistic Tags** - Add expressions like `[laugh]`, `[sigh]`, `[clear throat]`
+- **📦 Out of the Box default voice** - Jinx, a main character from the Arcane TV series
 
-This guide documents how to set up Chatterbox TTS in the NVIDIA PyTorch container:
-- **No watermarking** (skip `resemble-perth`)
-- **No torchaudio dependency** (use stubs)
+In order to get this to work, we had to hack out some parts of the official implementation:
+- **No watermarking** (skip `resemble-perth`) - unfortunately no water marking supported due to dependency issues
+- **No torchaudio dependency** (use stubs) - has no impact really
 - **ARM/GraceHopper compatible** (CUDA JIT fixes for complex tensor ops)
 
+This repo is pinned to a specific commit (yes I know, yuck), and as such is intended for demo purposes only.
+
 ---
+
+## Quick start
+
+```bash
+git clone https://github.com/antongisli/chatterbox-gb10.git
+cd chatterbox-gb10
+
+mkdir -p ./hf_cache
+
+# Turbo UI with Gradio
+docker run --gpus all -it --rm \
+  -e HF_TOKEN=hf_your_token_here \
+  -e HF_HOME=/cache/hf \
+  -e GRADIO_SHARE=1 \
+  -v "$PWD/hf_cache":/cache/hf \
+  -p 10050:10050 -p 7860:7860 \
+  -v "$PWD/voices/jinx":/workspace/audio \
+  chatterbox-tts
+```
 
 ## What's Modified
 
@@ -88,7 +110,7 @@ The model will be downloaded on first use from HuggingFace.
 
 ---
 
-## Optional: Start Enhanced Gradio UIs
+## Optional - recommended: Start Enhanced Gradio UIs
 
 The Docker image now includes a startup script that can run the API and/or
 the enhanced Gradio apps. By default it starts the API only.
@@ -101,6 +123,8 @@ By default, Gradio Turbo starts automatically. Use `GRADIO_MODE` to switch:
 - `GRADIO_MODE=original` - CFG/exaggeration controls, port 7861  
 - `GRADIO_MODE=none` - API only, no Gradio
 
+Use -e GRADIO_SHARE=1 to get a public URL (also needed for microphone recording options). The URL will be printed on startup. Disable if needed.
+
 ```bash
 mkdir -p ./hf_cache
 
@@ -108,6 +132,7 @@ mkdir -p ./hf_cache
 docker run --gpus all -it --rm \
   -e HF_TOKEN=hf_your_token_here \
   -e HF_HOME=/cache/hf \
+  -e GRADIO_SHARE=1 \
   -v "$PWD/hf_cache":/cache/hf \
   -p 10050:10050 -p 7860:7860 \
   -v "$PWD/voices/jinx":/workspace/audio \
@@ -117,6 +142,7 @@ docker run --gpus all -it --rm \
 docker run --gpus all -it --rm \
   -e HF_TOKEN=hf_your_token_here \
   -e HF_HOME=/cache/hf \
+  -e GRADIO_SHARE=1 \
   -v "$PWD/hf_cache":/cache/hf \
   -e GRADIO_MODE=original \
   -p 10050:10050 -p 7861:7861 \
